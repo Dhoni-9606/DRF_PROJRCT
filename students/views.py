@@ -22,10 +22,60 @@ students = [
         }
     ]
 
-@api_view(['GET'])
+# @api_view(['GET'])
+# def student_api(request):
+
+#     return Response(students)
+
+@api_view(['GET', 'POST'])
 def student_api(request):
 
-    return Response(students)
+    # GET: Retrieve students
+    if request.method == 'GET':
+
+        name = request.query_params.get('name')
+
+        if name:
+            filtered_students = []
+
+            for student in students:
+                if student['name'].lower() == name.lower():
+                    filtered_students.append(student)
+
+            return Response(
+                filtered_students,
+                status=status.HTTP_200_OK
+            )
+
+        return Response(
+            students,
+            status=status.HTTP_200_OK
+        )
+
+    # POST: Create a student
+    elif request.method == 'POST':
+
+        name = request.data.get('name')
+        course = request.data.get('course')
+
+        if not name or not course:
+            return Response(
+                {"error": "Name and course are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        new_student = {
+            "id": len(students) + 1,
+            "name": name,
+            "course": course
+        }
+
+        students.append(new_student)
+
+        return Response(
+            new_student,
+            status=status.HTTP_201_CREATED
+        )
 
 @api_view(['GET'])
 def courses_api(reauest):
